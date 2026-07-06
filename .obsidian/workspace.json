@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "docs/blueprint/06-engineering-guidelines.md",
+                "file": "openspec-workflow.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "06-engineering-guidelines"
+              "title": "openspec-workflow"
             }
           }
         ],
@@ -200,6 +200,9 @@
   },
   "active": "b3813b718fc91997",
   "lastOpenFiles": [
+    "AGENTS.md",
+    "openspec-workflow.md",
+    "docs/blueprint/06-engineering-guidelines.md",
     "_tmp_13356_e65889817c5b89fc8d8575c6d12e369d",
     "_tmp_27668_1056b4fd15d0d4a27955ada4215988bb",
     "pnpm-workspace.yaml",
@@ -209,8 +212,6 @@
     "docs/blueprint/01-information-architecture.md",
     "docs/blueprint/00-overview.md",
     "docs/blueprint/07-design-tokens.md",
-    "docs/blueprint/06-engineering-guidelines.md",
-    "AGENTS.md",
     "CHANGELOG.md",
     "docs-config-quality-analysis.md",
     "docs-analysis-report.md",
