@@ -1,0 +1,48 @@
+---
+interface Category {
+  name: string;
+  slug: string;
+}
+
+interface Props {
+  categories: Category[];
+  activeCategory: string;
+  baseUrl: string;
+}
+
+const { categories, activeCategory, baseUrl } = Astro.props;
+---
+
+<div class="border-border mb-6 border-b">
+  <nav class="flex gap-1 overflow-x-auto pb-px" aria-label="Category tabs">
+    {/* "All" tab */}
+    <a
+      href={baseUrl}
+      class:list={[
+        "-mb-px border-b-2 px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+        activeCategory === "all" || activeCategory === ""
+          ? "border-primary text-primary"
+          : "text-muted-foreground hover:text-foreground hover:border-muted border-transparent",
+      ]}
+    >
+      全部
+    </a>
+
+    {/* Category tabs */}
+    {
+      categories.map(category => (
+        <a
+          href={`${baseUrl}?category=${category.slug}`}
+          class:list={[
+            "-mb-px border-b-2 px-4 py-2 text-sm font-medium whitespace-nowrap transition-colors",
+            activeCategory === category.slug
+              ? "border-primary text-primary"
+              : "text-muted-foreground hover:text-foreground hover:border-muted border-transparent",
+          ]}
+        >
+          {category.name}
+        </a>
+      ))
+    }
+  </nav>
+</div>

@@ -4,6 +4,12 @@ export default {
   nav: {
     home: "Home",
     posts: "Posts",
+    articles: "Articles",
+    series: "Series",
+    collections: "Collections",
+    books: "Books",
+    tools: "Tools",
+    thoughts: "Thoughts",
     tags: "Tags",
     about: "About",
     archives: "Archives",
@@ -36,6 +42,13 @@ export default {
   footer: {
     copyright: "Copyright",
     allRightsReserved: "All rights reserved.",
+    navigation: "Navigation",
+    resources: "Resources",
+    contact: "Contact",
+    subscribe: "Subscribe",
+    subscribePlaceholder: "Enter your email",
+    subscribeButton: "Subscribe",
+    icp: "粤ICP备",
   },
   pages: {
     tagTitle: "Tag",

@@ -1,0 +1,42 @@
+---
+interface Props {
+  date: Date | null | undefined;
+  format?: "short" | "long" | "relative";
+}
+
+const { date, format = "short" } = Astro.props;
+
+function formatDate(date: Date, format: string): string {
+  if (format === "long") {
+    return date.toLocaleDateString("zh-CN", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  }
+
+  if (format === "relative") {
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+
+    if (days === 0) return "今天";
+    if (days === 1) return "昨天";
+    if (days < 7) return `${days}天前`;
+    if (days < 30) return `${Math.floor(days / 7)}周前`;
+    if (days < 365) return `${Math.floor(days / 30)}个月前`;
+    return `${Math.floor(days / 365)}年前`;
+  }
+
+  // short format (default)
+  return date.toLocaleDateString("zh-CN", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+}
+
+const formattedDate = date ? formatDate(date, format) : "";
+---
+
+{formattedDate && <time datetime={date?.toISOString()}>{formattedDate}</time>}

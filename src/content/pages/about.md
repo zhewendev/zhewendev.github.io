@@ -1,37 +1,28 @@
 ---
-title: "About"
-description: "A bit about me and this blog."
+title: "关于我"
+name: "张哲"
+role: "全栈开发者"
+avatar: "https://via.placeholder.com/200?text=Avatar"
+bio: "热爱技术与设计的开发者，专注于构建优雅且实用的产品。相信好的代码应该像好的文章一样清晰易懂。"
+location: "中国 · 上海"
+email: "hello@example.com"
+socials:
+  github: "https://github.com"
+  twitter: "https://twitter.com"
+  linkedin: "https://linkedin.com"
 ---
 
-AstroPaper is a minimal, accessible and SEO-friendly blog theme built with [Astro](https://astro.build/) and [Tailwind CSS](https://tailwindcss.com/).
+## 关于这个博客
 
-![Astro Paper](@/assets/images/astropaper-og.jpg)
+这是一个基于 Astro 构建的个人知识博客，用于记录学习笔记、技术探索和日常思考。
 
-AstroPaper provides a solid foundation for blogs, or even portfolios\_ with full markdown support, built-in dark mode, and a clean layout that works out-of-the-box.
+### 技术栈
 
-The blog posts in this theme also serve as guides, docs or example articles\_ making AstroPaper a flexible starting point for your next content-driven site.
+- **框架**: Astro v7
+- **样式**: Tailwind CSS v4
+- **语言**: TypeScript
+- **部署**: GitHub Pages
 
-## Features
+## 我的理念
 
-AstroPaper comes with a set of useful features that make content publishing easy and effective:
-
-- SEO-friendly
-- Fast performance
-- Light & dark mode
-- Highly customizable
-- Organizable blog posts
-- Responsive & accessible
-- Static search with [PageFind](https://pagefind.app/)
-- Automatic social image generation
-
-and so much more.
-
-## Show your support
-
-If you like [AstroPaper](https://github.com/satnaing/astro-paper), consider giving it a star ⭐️.
-
-Found a bug 🐛 or have an improvement ✨ in mind? Feel free to open an [issue](https://github.com/satnaing/astro-paper/issues), submit a [pull request](https://github.com/satnaing/astro-paper/pulls) or start a [discussion](https://github.com/satnaing/astro-paper/discussions).
-
-If you find this theme helpful, you can also [sponsor me on GitHub](https://github.com/sponsors/satnaing) or [buy me a coffee](https://buymeacoffee.com/satnaing) to show your support — every penny counts.
-
-Kyay zuu! 🙏🏼
+> 保持好奇，持续学习，乐于分享。

@@ -1,7 +1,9 @@
 ---
 import type { HTMLAttributes } from "astro/types";
+import { getRelativeLocaleUrl } from "astro:i18n";
 import Socials from "./Socials.astro";
 import { useTranslations } from "@/i18n";
+import config from "@/config";
 
 type Props = {
   noMarginTop?: boolean;
@@ -10,21 +12,140 @@ type Props = {
 const { noMarginTop = false, class: className, ...attrs } = Astro.props;
 
 const t = useTranslations(Astro.currentLocale);
+const locale = Astro.currentLocale ?? "en";
 const currentYear = new Date().getFullYear();
+
+// Footer navigation links
+const navLinks = [
+  { name: t.nav.home, href: "/" },
+  { name: t.nav.articles, href: "/articles" },
+  { name: t.nav.series, href: "/series" },
+  { name: t.nav.thoughts, href: "/thoughts" },
+  { name: t.nav.about, href: "/about" },
+];
+
+const resourceLinks = [
+  { name: "RSS", href: "/rss.xml" },
+  { name: "Sitemap", href: "/sitemap.xml" },
+  { name: t.nav.tags, href: "/tags" },
+  { name: t.nav.archives, href: "/archives" },
+];
+
+const contactLinks = config.socials.slice(0, 3); // First 3 social links
 ---
 
 <footer
   class:list={["app-layout", { "mt-auto": !noMarginTop }, className]}
   {...attrs}
 >
+  <!-- Main Footer Content -->
+  <div class="border-border border-t py-12">
+    <div class="grid grid-cols-2 gap-8 md:grid-cols-4">
+      {/* Navigation Column */}
+      <div>
+        <h3 class="mb-4 font-semibold">{t.footer.navigation}</h3>
+        <ul class="space-y-2">
+          {
+            navLinks.map(link => (
+              <li>
+                <a
+                  href={getRelativeLocaleUrl(locale, link.href)}
+                  class="hover:text-accent text-sm transition-colors"
+                >
+                  {link.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {/* Resources Column */}
+      <div>
+        <h3 class="mb-4 font-semibold">{t.footer.resources}</h3>
+        <ul class="space-y-2">
+          {
+            resourceLinks.map(link => (
+              <li>
+                <a
+                  href={getRelativeLocaleUrl(locale, link.href)}
+                  class="hover:text-accent text-sm transition-colors"
+                >
+                  {link.name}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {/* Contact Column */}
+      <div>
+        <h3 class="mb-4 font-semibold">{t.footer.contact}</h3>
+        <ul class="space-y-2">
+          {
+            contactLinks.map(link => (
+              <li>
+                <a
+                  href={link.url}
+                  class="hover:text-accent text-sm transition-colors"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  {link.name.charAt(0).toUpperCase() + link.name.slice(1)}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+
+      {/* Subscribe Column */}
+      <div>
+        <h3 class="mb-4 font-semibold">{t.footer.subscribe}</h3>
+        <p class="text-muted-foreground mb-3 text-sm">
+          订阅最新内容，不错过更新
+        </p>
+        <div class="flex gap-2">
+          <input
+            type="email"
+            placeholder={t.footer.subscribePlaceholder}
+            disabled
+            class="border-input bg-background flex-1 cursor-not-allowed rounded-md border px-3 py-2 text-sm opacity-50"
+          />
+          <button
+            disabled
+            class="bg-primary text-primary-foreground hover:bg-primary/90 cursor-not-allowed rounded-md px-4 py-2 text-sm font-medium opacity-50"
+          >
+            {t.footer.subscribeButton}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    {/* Social Icons Row */}
+    <div class="mt-10 flex justify-center">
+      <Socials />
+    </div>
+  </div>
+
+  {/* Copyright Row */}
   <div
-    class="border-border flex flex-col items-center justify-between border-t py-6 sm:flex-row-reverse sm:py-4"
+    class="border-border flex flex-col items-center justify-between gap-2 border-t py-4 text-sm sm:flex-row"
   >
-    <Socials />
-    <div class="my-2 flex flex-col items-center whitespace-nowrap sm:flex-row">
-      <span>{t.footer.copyright} &#169; {currentYear}</span>
-      <span class="hidden sm:inline">&nbsp;|&nbsp;</span>
-      <span>{t.footer.allRightsReserved}</span>
+    <div class="text-muted-foreground flex items-center gap-1">
+      <span>&#169; {currentYear} {config.site.title}</span>
+      <span class="hidden sm:inline">·</span>
+      <span class="hidden sm:inline">{t.footer.allRightsReserved}</span>
+    </div>
+    <div class="text-muted-foreground flex items-center gap-3">
+      <span>{t.footer.icp} 20040020000 号</span>
+      <span>·</span>
+      <a href="/rss.xml" class="hover:text-accent transition-colors">RSS</a>
+      <span>·</span>
+      <a href="/sitemap.xml" class="hover:text-accent transition-colors"
+        >Sitemap</a
+      >
     </div>
   </div>
 </footer>

@@ -1,0 +1,111 @@
+---
+import { getCollection, render } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import ThoughtCalendar from "@/components/ThoughtCalendar.astro";
+import ThoughtTimeline from "@/components/ThoughtTimeline.astro";
+import config from "@/config";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+
+// Get all thoughts with rendered content
+const allThoughts = await getCollection("thoughts");
+const thoughtsWithContent = await Promise.all(
+  allThoughts.map(async thought => {
+    const { Content } = await render(thought);
+    return { ...thought, Content };
+  })
+);
+
+const thoughts = thoughtsWithContent.sort(
+  (a, b) =>
+    new Date(b.data.pubDatetime).getTime() -
+    new Date(a.data.pubDatetime).getTime()
+);
+
+// Get unique tags
+const allTags = thoughts.flatMap(t => t.data.tags || []);
+const uniqueTags = [...new Set(allTags)];
+
+// Get current tag filter
+const url = new URL(Astro.request.url);
+const currentTag = url.searchParams.get("tag") || "all";
+
+// Filter thoughts
+const filteredThoughts =
+  currentTag === "all"
+    ? thoughts
+    : thoughts.filter(t => t.data.tags?.includes(currentTag));
+---
+
+<Layout title={`随想 | ${config.site.title}`}>
+  <Header />
+  <main id="main-content" class="app-layout py-8">
+    {/* Page Header */}
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">随想</h1>
+      <p class="text-muted-foreground mt-2">
+        记录日常思考和生活点滴，共 {thoughts.length} 条
+      </p>
+    </div>
+
+    <div class="grid gap-8 lg:grid-cols-[280px_1fr]">
+      {/* Sidebar */}
+      <aside class="space-y-6">
+        {/* Calendar */}
+        <ThoughtCalendar thoughts={thoughts} />
+
+        {/* Tags */}
+        {
+          uniqueTags.length > 0 && (
+            <div class="rounded-xl border p-4">
+              <h3 class="mb-3 font-semibold">标签</h3>
+              <div class="flex flex-wrap gap-2">
+                <a
+                  href={getRelativeLocaleUrl(locale, "thoughts")}
+                  class:list={[
+                    "rounded-full px-3 py-1 text-sm transition-colors",
+                    currentTag === "all"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground",
+                  ]}
+                >
+                  全部
+                </a>
+                {uniqueTags.map(tag => (
+                  <a
+                    href={`${getRelativeLocaleUrl(locale, "thoughts")}?tag=${tag}`}
+                    class:list={[
+                      "rounded-full px-3 py-1 text-sm transition-colors",
+                      currentTag === tag
+                        ? "bg-primary text-primary-foreground"
+                        : "bg-secondary text-secondary-foreground hover:bg-accent hover:text-accent-foreground",
+                    ]}
+                  >
+                    {tag}
+                  </a>
+                ))}
+              </div>
+            </div>
+          )
+        }
+      </aside>
+
+      {/* Timeline */}
+      <div>
+        {
+          filteredThoughts.length > 0 ? (
+            <ThoughtTimeline thoughts={filteredThoughts} />
+          ) : (
+            <div class="text-muted-foreground py-12 text-center">
+              <p>暂无随想</p>
+            </div>
+          )
+        }
+      </div>
+    </div>
+  </main>
+  <Footer />
+</Layout>

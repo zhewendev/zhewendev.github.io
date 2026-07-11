@@ -1,0 +1,164 @@
+---
+interface Props {
+  id: string;
+  title?: string;
+  open?: boolean;
+}
+
+const { id, title, open = false } = Astro.props;
+---
+
+<dialog
+  id={id}
+  class="modal bg-background m-auto max-h-[90vh] max-w-[90vw] rounded-xl p-0 shadow-2xl backdrop:bg-black/50 backdrop:backdrop-blur-sm"
+  open={open}
+>
+  <div class="flex max-h-[90vh] flex-col">
+    {/* Header */}
+    {
+      title && (
+        <div class="flex items-center justify-between border-b px-6 py-4">
+          <h2 class="text-lg font-semibold">{title}</h2>
+          <button
+            type="button"
+            class="modal-close text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded p-1 transition-colors"
+            aria-label="关闭"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M18 6 6 18" />
+              <path d="m6 6 12 12" />
+            </svg>
+          </button>
+        </div>
+      )
+    }
+
+    {/* Content */}
+    <div class="flex-1 overflow-auto p-6">
+      <slot />
+    </div>
+
+    {/* Footer slot */}
+    <div class="border-t px-6 py-4">
+      <slot name="footer" />
+    </div>
+  </div>
+</dialog>
+
+<script>
+  // Store cleanup functions for each modal
+  const modalCleanups = new Map<HTMLDialogElement, () => void>();
+
+  // Modal functionality
+  function initModals() {
+    const modals = document.querySelectorAll<HTMLDialogElement>(".modal");
+
+    modals.forEach(dialog => {
+      // Skip if already initialized
+      if (modalCleanups.has(dialog)) return;
+
+      const handlers: (() => void)[] = [];
+
+      // Close button handler
+      const closeBtn = dialog.querySelector(".modal-close");
+      if (closeBtn) {
+        const handleClose = () => dialog.close();
+        closeBtn.addEventListener("click", handleClose);
+        handlers.push(() => closeBtn.removeEventListener("click", handleClose));
+      }
+
+      // Backdrop click handler
+      const handleBackdropClick = (e: MouseEvent) => {
+        const rect = dialog.getBoundingClientRect();
+        const isInDialog =
+          rect.top <= e.clientY &&
+          e.clientY <= rect.top + rect.height &&
+          rect.left <= e.clientX &&
+          e.clientX <= rect.left + rect.width;
+        if (!isInDialog) {
+          dialog.close();
+        }
+      };
+      dialog.addEventListener("click", handleBackdropClick);
+      handlers.push(() =>
+        dialog.removeEventListener("click", handleBackdropClick)
+      );
+
+      // Escape key handler
+      const handleKeydown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") {
+          dialog.close();
+        }
+      };
+      dialog.addEventListener("keydown", handleKeydown);
+      handlers.push(() => dialog.removeEventListener("keydown", handleKeydown));
+
+      // Store cleanup function
+      modalCleanups.set(dialog, () => {
+        handlers.forEach(cleanup => cleanup());
+      });
+    });
+  }
+
+  // Cleanup function for page transitions
+  function cleanupModals() {
+    modalCleanups.forEach(cleanup => cleanup());
+    modalCleanups.clear();
+  }
+
+  // Expose global function to open modals
+  (window as any).openModal = (id: string) => {
+    const modal = document.getElementById(id) as HTMLDialogElement;
+    if (modal) {
+      modal.showModal();
+    }
+  };
+
+  (window as any).closeModal = (id: string) => {
+    const modal = document.getElementById(id) as HTMLDialogElement;
+    if (modal) {
+      modal.close();
+    }
+  };
+
+  // Initialize on first load
+  initModals();
+
+  // Re-initialize after Astro page transitions
+  document.addEventListener("astro:after-swap", () => {
+    cleanupModals();
+    initModals();
+  });
+</script>
+
+<style>
+  .modal::backdrop {
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+  }
+
+  .modal[open] {
+    animation: modal-show 0.2s ease-out;
+  }
+
+  @keyframes modal-show {
+    from {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+</style>

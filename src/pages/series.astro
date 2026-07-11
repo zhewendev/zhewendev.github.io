@@ -1,0 +1,94 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import SeriesCard from "@/components/SeriesCard.astro";
+import config from "@/config";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+
+// Get all series
+const allSeries = await getCollection("series");
+const series = allSeries
+  .filter(s => !s.data.draft)
+  .sort((a, b) => (b.data.order || 0) - (a.data.order || 0));
+
+// Get unique tags
+const allTags = series.flatMap(s => s.data.tags || []);
+const uniqueTags = [...new Set(allTags)];
+---
+
+<Layout title={`专题 | ${config.site.title}`}>
+  <Header />
+  <main id="main-content" class="app-layout py-8">
+    {/* Page Header */}
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">专题</h1>
+      <p class="text-muted-foreground mt-2">
+        共 {series.length} 个专题，系统化的知识整理
+      </p>
+    </div>
+
+    {/* Search */}
+    <div class="mb-6">
+      <a
+        href={getRelativeLocaleUrl(locale, "search")}
+        class="bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <span>搜索专题...</span>
+      </a>
+    </div>
+
+    {/* Tags Filter */}
+    {
+      uniqueTags.length > 0 && (
+        <div class="mb-8 flex flex-wrap gap-2">
+          <a
+            href={getRelativeLocaleUrl(locale, "series")}
+            class="bg-primary text-primary-foreground rounded-full px-4 py-1.5 text-sm"
+          >
+            全部
+          </a>
+          {uniqueTags.map(tag => (
+            <a
+              href={`${getRelativeLocaleUrl(locale, "series")}?tag=${tag}`}
+              class="text-muted-foreground hover:bg-accent hover:text-accent-foreground rounded-full border px-4 py-1.5 text-sm transition-colors"
+            >
+              {tag}
+            </a>
+          ))}
+        </div>
+      )
+    }
+
+    {/* Series Grid */}
+    {
+      series.length > 0 ? (
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {series.map(s => (
+            <SeriesCard series={s} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-muted-foreground py-12 text-center">
+          <p>暂无专题</p>
+        </div>
+      )
+    }
+  </main>
+  <Footer />
+</Layout>

@@ -19,7 +19,7 @@ export default defineAstroPaperConfig({
   },
   features: {
     lightAndDarkMode: true,
-    dynamicOgImage: true,
+    dynamicOgImage: false, // Disabled due to font loading issues
     showArchives: true,
     showBackButton: true,
     editPost: {
@@ -29,10 +29,14 @@ export default defineAstroPaperConfig({
     search: "pagefind",
   },
   socials: [
-    { name: "github",   url: "https://github.com/satnaing/astro-paper" },
-    { name: "x",        url: "https://x.com/username" },
-    { name: "linkedin", url: "https://www.linkedin.com/in/username/" },
-    { name: "mail",     url: "mailto:yourmail@gmail.com" },
+    { name: "github",     url: "https://github.com/zhewendev" },
+    { name: "xiaohongshu", url: "https://www.xiaohongshu.com/user/profile" },
+    { name: "wechat",     url: "#" },
+    { name: "douyin",     url: "https://www.douyin.com/user" },
+    { name: "zhihu",      url: "https://www.zhihu.com/people/username" },
+    { name: "bilibili",   url: "https://space.bilibili.com/username" },
+    { name: "mail",       url: "mailto:zhewen@example.com" },
+    { name: "rss",        url: "/rss.xml" },
   ],
   shareLinks: [
     { name: "whatsapp", url: "https://wa.me/?text=" },

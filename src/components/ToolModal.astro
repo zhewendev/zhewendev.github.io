@@ -1,0 +1,91 @@
+---
+import Modal from "./Modal.astro";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  tool: CollectionEntry<"tools">;
+}
+
+const { tool } = Astro.props;
+
+const { name, description, icon, category, tags, recommendation, link } =
+  tool.data;
+const rawIcon = typeof icon === "string" ? icon : icon?.src;
+
+const recommendationLabels = {
+  essential: "必备",
+  recommended: "推荐",
+  optional: "了解",
+};
+---
+
+<Modal id={`tool-modal-${tool.id}`} title={name}>
+  <div class="flex flex-col items-center gap-6 sm:flex-row sm:items-start">
+    {/* Icon */}
+    <div
+      class="bg-muted flex h-24 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl"
+    >
+      <img
+        src={rawIcon || "/images/placeholder/tool.svg"}
+        alt={name}
+        class="h-16 w-16 object-contain"
+      />
+    </div>
+
+    {/* Details */}
+    <div class="flex-1 text-center sm:text-left">
+      <p class="text-muted-foreground">{category}</p>
+
+      {/* Recommendation */}
+      <div class="mt-3">
+        <span
+          class:list={[
+            "inline-block rounded-full px-3 py-1 text-sm font-medium text-white",
+            recommendation === "essential" && "bg-red-500",
+            recommendation === "recommended" && "bg-orange-500",
+            recommendation === "optional" && "bg-blue-400",
+          ]}
+        >
+          {recommendationLabels[recommendation]}
+        </span>
+      </div>
+
+      {/* Description */}
+      <p class="text-muted-foreground mt-4 leading-relaxed">{description}</p>
+
+      {/* Tags */}
+      {
+        tags && tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap justify-center gap-2 sm:justify-start">
+            {tags.map(tag => (
+              <span class="rounded-full border px-3 py-1 text-sm">{tag}</span>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+
+  {/* Footer */}
+  <div slot="footer" class="flex justify-end gap-3">
+    <button
+      type="button"
+      class="hover:bg-accent hover:text-accent-foreground rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+      onclick={`window.closeModal('tool-modal-${tool.id}')`}
+    >
+      关闭
+    </button>
+    {
+      link && (
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+        >
+          访问官网
+        </a>
+      )
+    }
+  </div>
+</Modal>

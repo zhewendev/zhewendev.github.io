@@ -1,0 +1,151 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import BookCard from "@/components/BookCard.astro";
+import BookModal from "@/components/BookModal.astro";
+import config from "@/config";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+
+// Get all books
+const allBooks = await getCollection("books");
+const books = allBooks.sort(
+  (a, b) => (b.data.rating || 0) - (a.data.rating || 0)
+);
+
+// Stats
+const totalBooks = books.length;
+const readingCount = books.filter(b => b.data.status === "reading").length;
+const completedCount = books.filter(b => b.data.status === "completed").length;
+const wantToReadCount = books.filter(
+  b => b.data.status === "want-to-read"
+).length;
+
+// Filter by status
+const url = new URL(Astro.request.url);
+const currentFilter = url.searchParams.get("status") || "all";
+
+const filteredBooks =
+  currentFilter === "all"
+    ? books
+    : books.filter(b => b.data.status === currentFilter);
+
+// Get unique tags
+const allTags = books.flatMap(b => b.data.tags || []);
+const uniqueTags = [...new Set(allTags)];
+---
+
+<Layout title={`书籍收藏 | ${config.site.title}`}>
+  <Header />
+  <main id="main-content" class="app-layout py-8">
+    {/* Page Header */}
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">书籍收藏</h1>
+      <p class="text-muted-foreground mt-2">记录阅读历程，分享读书心得</p>
+    </div>
+
+    {/* Stats */}
+    <div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold">{totalBooks}</div>
+        <div class="text-muted-foreground text-sm">全部</div>
+      </div>
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold text-blue-500">{readingCount}</div>
+        <div class="text-muted-foreground text-sm">在读</div>
+      </div>
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold text-green-500">{completedCount}</div>
+        <div class="text-muted-foreground text-sm">已读</div>
+      </div>
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold text-gray-400">{wantToReadCount}</div>
+        <div class="text-muted-foreground text-sm">想读</div>
+      </div>
+    </div>
+
+    {/* Filters */}
+    <div class="mb-6 flex flex-wrap gap-2">
+      <a
+        href={getRelativeLocaleUrl(locale, "books")}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "all"
+            ? "bg-primary text-primary-foreground"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        全部
+      </a>
+      <a
+        href={`${getRelativeLocaleUrl(locale, "books")}?status=reading`}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "reading"
+            ? "bg-blue-500 text-white"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        在读
+      </a>
+      <a
+        href={`${getRelativeLocaleUrl(locale, "books")}?status=completed`}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "completed"
+            ? "bg-green-500 text-white"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        已读
+      </a>
+      <a
+        href={`${getRelativeLocaleUrl(locale, "books")}?status=want-to-read`}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "want-to-read"
+            ? "bg-gray-400 text-white"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        想读
+      </a>
+    </div>
+
+    {/* Tags */}
+    {
+      uniqueTags.length > 0 && (
+        <div class="mb-6 flex flex-wrap gap-2">
+          {uniqueTags.map(tag => (
+            <span class="bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-xs">
+              {tag}
+            </span>
+          ))}
+        </div>
+      )
+    }
+
+    {/* Books Grid */}
+    {
+      filteredBooks.length > 0 ? (
+        <div class="grid gap-4 sm:grid-cols-2">
+          {filteredBooks.map(book => (
+            <BookCard book={book} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-muted-foreground py-12 text-center">
+          <p>暂无书籍</p>
+        </div>
+      )
+    }
+  </main>
+
+  {/* Modals */}
+  {books.map(book => <BookModal book={book} />)}
+
+  <Footer />
+</Layout>
