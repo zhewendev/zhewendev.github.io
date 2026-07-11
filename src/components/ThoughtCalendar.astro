@@ -1,0 +1,145 @@
+---
+interface Props {
+  thoughts: Array<{
+    data: {
+      pubDatetime: Date;
+    };
+  }>;
+  currentDate?: Date;
+}
+
+const { thoughts, currentDate = new Date() } = Astro.props;
+
+// Get all dates with thoughts
+const thoughtDates = thoughts.map(t =>
+  new Date(t.data.pubDatetime).toDateString()
+);
+
+// Calendar logic
+const year = currentDate.getFullYear();
+const month = currentDate.getMonth();
+const firstDay = new Date(year, month, 1);
+const lastDay = new Date(year, month + 1, 0);
+const daysInMonth = lastDay.getDate();
+const startDayOfWeek = firstDay.getDay();
+
+const monthNames = [
+  "一月",
+  "二月",
+  "三月",
+  "四月",
+  "五月",
+  "六月",
+  "七月",
+  "八月",
+  "九月",
+  "十月",
+  "十一月",
+  "十二月",
+];
+
+const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
+
+// Generate calendar days
+const days: Array<{ day: number | null; hasThought: boolean; date?: Date }> =
+  [];
+
+// Empty cells for days before the first day of month
+for (let i = 0; i < startDayOfWeek; i++) {
+  days.push({ day: null, hasThought: false });
+}
+
+// Days of the month
+for (let day = 1; day <= daysInMonth; day++) {
+  const date = new Date(year, month, day);
+  const hasThought = thoughtDates.includes(date.toDateString());
+  days.push({ day, hasThought, date });
+}
+---
+
+<div class="rounded-xl border p-4">
+  <div class="mb-4 flex items-center justify-between">
+    <h3 class="font-semibold">{year}年 {monthNames[month]}</h3>
+    <div class="flex gap-1">
+      <button
+        class="hover:bg-accent hover:text-accent-foreground rounded p-1"
+        aria-label="上个月"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+      </button>
+      <button
+        class="hover:bg-accent hover:text-accent-foreground rounded p-1"
+        aria-label="下个月"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {/* Week day headers */}
+  <div
+    class="text-muted-foreground mb-2 grid grid-cols-7 gap-1 text-center text-xs"
+  >
+    {weekDays.map(day => <div>{day}</div>)}
+  </div>
+
+  {/* Calendar days */}
+  <div class="grid grid-cols-7 gap-1">
+    {
+      days.map(item => (
+        <div class="aspect-square">
+          {item.day ? (
+            <a
+              href={
+                item.hasThought
+                  ? `#thought-${item.date?.toISOString().split("T")[0]}`
+                  : undefined
+              }
+              class:list={[
+                "flex h-full w-full items-center justify-center rounded text-sm transition-colors",
+                item.hasThought
+                  ? "bg-accent text-accent-foreground hover:bg-accent/90 font-medium"
+                  : "hover:bg-muted",
+              ]}
+            >
+              {item.day}
+            </a>
+          ) : (
+            <div />
+          )}
+        </div>
+      ))
+    }
+  </div>
+
+  <div class="text-muted-foreground mt-3 flex items-center gap-4 text-xs">
+    <div class="flex items-center gap-1">
+      <div class="bg-accent h-3 w-3 rounded"></div>
+      <span>有随想</span>
+    </div>
+    <div class="flex items-center gap-1">
+      <div class="h-3 w-3 rounded border"></div>
+      <span>无随想</span>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  series: CollectionEntry<"series">;
+}
+
+const { series } = Astro.props;
+const locale = Astro.currentLocale ?? "en";
+
+const { title, description, tags } = series.data;
+const placeholderImage = "/images/placeholder/article.svg";
+---
+
+<article
+  class="group bg-card relative overflow-hidden rounded-xl border transition-all hover:shadow-lg"
+>
+  <a
+    href={getRelativeLocaleUrl(locale, `series/${series.id}`)}
+    class="flex h-full flex-col"
+  >
+    {/* Cover Image */}
+    <div class="bg-muted relative aspect-[16/9] overflow-hidden">
+      <img
+        src={placeholderImage}
+        alt={title}
+        class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
+      />
+      <div
+        class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"
+      >
+      </div>
+      <div class="absolute right-4 bottom-4 left-4">
+        <h3 class="line-clamp-2 text-lg font-semibold text-white">{title}</h3>
+      </div>
+    </div>
+
+    {/* Content */}
+    <div class="flex flex-1 flex-col p-4">
+      <p class="text-muted-foreground line-clamp-2 flex-1 text-sm">
+        {description}
+      </p>
+
+      {/* Tags */}
+      {
+        tags && tags.length > 0 && (
+          <div class="mt-3 flex flex-wrap gap-1">
+            {tags.slice(0, 3).map(tag => (
+              <span class="bg-secondary text-secondary-foreground rounded-full px-2 py-0.5 text-xs">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </a>
+</article>

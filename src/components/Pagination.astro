@@ -1,45 +1,113 @@
 ---
 import type { Page } from "astro";
 import type { CollectionEntry } from "astro:content";
-import IconArrowLeft from "@/assets/icons/IconArrowLeft.svg";
-import IconArrowRight from "@/assets/icons/IconArrowRight.svg";
 import LinkButton from "./LinkButton.astro";
 import { useTranslations } from "@/i18n";
 
 type Props = {
   page: Page<CollectionEntry<"posts">>;
+  showNumbers?: boolean;
 };
 
-const { page } = Astro.props;
-
+const { page, showNumbers = true } = Astro.props;
 const t = useTranslations(Astro.currentLocale);
+
+// Generate page numbers to display
+function getPageNumbers(current: number, last: number): (number | string)[] {
+  if (last <= 7) {
+    return Array.from({ length: last }, (_, i) => i + 1);
+  }
+
+  const pages: (number | string)[] = [];
+
+  // Always show first page
+  pages.push(1);
+
+  if (current <= 3) {
+    // Near start: 1 2 3 4 ... last
+    pages.push(2, 3, 4);
+    pages.push("...");
+    pages.push(last);
+  } else if (current >= last - 2) {
+    // Near end: 1 ... last-3 last-2 last-1 last
+    pages.push("...");
+    pages.push(last - 3, last - 2, last - 1, last);
+  } else {
+    // Middle: 1 ... current-1 current current+1 ... last
+    pages.push("...");
+    pages.push(current - 1, current, current + 1);
+    pages.push("...");
+    pages.push(last);
+  }
+
+  return pages;
+}
+
+const pageNumbers = getPageNumbers(page.currentPage, page.lastPage);
 ---
 
 {
   page.lastPage > 1 && (
     <nav
-      class="mt-auto mb-8 flex justify-center gap-4"
+      class="mt-8 flex items-center justify-center gap-2"
       role="navigation"
       aria-label="Pagination Navigation"
     >
+      {/* Previous Button */}
       <LinkButton
         disabled={!page.url.prev}
         href={page.url.prev as string}
-        class:list={["select-none", { "opacity-50": !page.url.prev }]}
+        class:list={[
+          "px-3 py-2 text-sm font-medium select-none",
+          { "cursor-not-allowed opacity-50": !page.url.prev },
+        ]}
         aria-label={t.a11y.goToPreviousPage}
       >
-        <IconArrowLeft class="inline-block rtl:rotate-180" />
         {t.pagination.prev}
       </LinkButton>
-      {page.currentPage} / {page.lastPage}
+
+      {/* Page Numbers */}
+      {showNumbers && (
+        <div class="flex items-center gap-1">
+          {pageNumbers.map(num =>
+            num === "..." ? (
+              <span class="text-muted-foreground px-2">...</span>
+            ) : (
+              <a
+                href={`${page.url.current ? page.url.current.replace(/\?page=\d+/, "") : ""}?page=${num}`}
+                class:list={[
+                  "min-w-[36px] rounded-md px-3 py-2 text-center text-sm font-medium transition-colors",
+                  num === page.currentPage
+                    ? "bg-primary text-primary-foreground"
+                    : "hover:bg-accent hover:text-accent-foreground",
+                ]}
+                aria-current={num === page.currentPage ? "page" : undefined}
+              >
+                {num}
+              </a>
+            )
+          )}
+        </div>
+      )}
+
+      {/* Simple mode: current / total */}
+      {!showNumbers && (
+        <span class="px-4 text-sm">
+          {page.currentPage} / {page.lastPage}
+        </span>
+      )}
+
+      {/* Next Button */}
       <LinkButton
         disabled={!page.url.next}
         href={page.url.next as string}
-        class:list={["select-none", { "opacity-50": !page.url.next }]}
+        class:list={[
+          "px-3 py-2 text-sm font-medium select-none",
+          { "cursor-not-allowed opacity-50": !page.url.next },
+        ]}
         aria-label={t.a11y.goToNextPage}
       >
         {t.pagination.next}
-        <IconArrowRight class="inline-block rtl:rotate-180" />
       </LinkButton>
     </nav>
   )

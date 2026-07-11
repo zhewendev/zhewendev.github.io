@@ -27,12 +27,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "openspec-workflow.md",
+                "file": "docs/blueprint/07-design-tokens.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "openspec-workflow"
+              "title": "07-design-tokens"
             }
           }
         ],
@@ -200,14 +200,30 @@
   },
   "active": "b3813b718fc91997",
   "lastOpenFiles": [
+    "dist/sitemap-0.xml",
+    "dist/sitemap-index.xml",
+    "dist/index.html",
+    "dist/tools/index.html",
+    "dist/tools",
+    "dist/thoughts/index.html",
+    "dist/thoughts",
+    "dist/tags/index.html",
+    "dist/tags/web开发/index.html",
+    "dist/tags/web开发",
+    "dist/tags/typescript/index.html",
+    "dist/_astro/favicon.Czy1EQHj.svg",
+    "dist/_astro/facebook.DViGtK9D.svg",
+    "dist/_astro/github.D4TpU-sh.svg",
+    "dist/_astro/bilibili.Dqg40ESD.svg",
+    "dist/_astro/zhihu.Dr9rQRUn.svg",
+    "dist/_astro/douyin.CL56uTa6.svg",
+    "dist/images/placeholder/tool.svg",
+    "dist/images/placeholder/book.svg",
+    "dist/images/placeholder/article.svg",
+    "dist/images/hero/bg-3.svg",
     "AGENTS.md",
     "openspec-workflow.md",
     "docs/blueprint/06-engineering-guidelines.md",
-    "_tmp_13356_e65889817c5b89fc8d8575c6d12e369d",
-    "_tmp_27668_1056b4fd15d0d4a27955ada4215988bb",
-    "pnpm-workspace.yaml",
-    "pnpm-workspace.yaml.244172783",
-    "_tmp_8308_4d3042abd77d44fee9c7dfa69726efd5",
     "docs/blueprint/05-design-system.md",
     "docs/blueprint/01-information-architecture.md",
     "docs/blueprint/00-overview.md",
@@ -220,12 +236,6 @@
     "docs/blueprint/04-technical-architecture.md",
     "docs/blueprint/03-content-workflow.md",
     "docs/blueprint/02-content-model.md",
-    "README.md",
-    "AstroPaper-lighthouse-score.svg",
-    "openspec/config.yaml",
-    "openspec/changes/archive",
-    "openspec/specs",
-    "openspec/changes",
-    "openspec"
+    "README.md"
   ]
 }

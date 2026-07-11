@@ -2,35 +2,105 @@
 import { getEntry, render } from "astro:content";
 import Layout from "@/layouts/Layout.astro";
 import Header from "@/components/Header.astro";
-import Breadcrumb from "@/components/Breadcrumb.astro";
-import Main from "@/components/Main.astro";
 import Footer from "@/components/Footer.astro";
+import ProfileCard from "@/components/ProfileCard.astro";
+import AboutCard from "@/components/AboutCard.astro";
 import config from "@/config";
 
-const about = await getEntry("pages", "about");
+// Get about page content
+const aboutPage = await getEntry("pages", "about");
 
-if (!about) {
-  throw new Error(
-    "Missing content entry: `about.md` or `about.mdx` in `src/content/pages/`"
-  );
+if (!aboutPage) {
+  throw new Error("About page not found");
 }
 
-const { Content } = await render(about);
+const { Content } = await render(aboutPage);
+
+// What I'm doing cards data
+const doingCards = [
+  {
+    icon: "code",
+    title: "开源项目",
+    description: "积极参与开源社区，维护个人项目，分享技术经验与最佳实践。",
+    link: "https://github.com",
+    linkText: "查看 GitHub",
+  },
+  {
+    icon: "pen",
+    title: "技术写作",
+    description: "定期撰写技术博客，记录学习历程，分享对技术的理解与思考。",
+    link: "/articles",
+    linkText: "阅读文章",
+  },
+  {
+    icon: "book",
+    title: "持续学习",
+    description: "保持对新技术的敏感度，阅读技术书籍，参加技术会议与分享。",
+    link: "/books",
+    linkText: "查看书单",
+  },
+  {
+    icon: "rocket",
+    title: "产品设计",
+    description: "关注用户体验与产品设计，尝试将技术与设计完美结合。",
+  },
+];
 ---
 
-<Layout
-  title={`${about.data.title} | ${config.site.title}`}
-  description={about.data.description}
-  ogImage={about.data.ogImage}
-  canonicalURL={about.data.canonicalURL}
->
+<Layout title={`关于 | ${config.site.title}`}>
   <Header />
+  <main id="main-content" class="app-layout py-8">
+    {/* Page Header */}
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">关于</h1>
+      <p class="text-muted-foreground mt-2">了解更多关于我和我的工作</p>
+    </div>
 
-  <Breadcrumb />
+    <div class="grid gap-8 lg:grid-cols-[320px_1fr]">
+      {/* Left Sidebar - Profile */}
+      <aside class="space-y-6">
+        <ProfileCard page={aboutPage} />
 
-  <Main pageTitle={about.data.title} class="app-prose">
-    <Content />
-  </Main>
+        {/* Quick Stats */}
+        <div class="bg-card rounded-xl border p-4">
+          <h3 class="font-semibold">数据概览</h3>
+          <div class="mt-4 grid grid-cols-2 gap-4">
+            <div class="text-center">
+              <div class="text-2xl font-bold">6</div>
+              <div class="text-muted-foreground text-xs">文章</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold">3</div>
+              <div class="text-muted-foreground text-xs">专题</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold">4</div>
+              <div class="text-muted-foreground text-xs">书籍</div>
+            </div>
+            <div class="text-center">
+              <div class="text-2xl font-bold">5</div>
+              <div class="text-muted-foreground text-xs">工具</div>
+            </div>
+          </div>
+        </div>
+      </aside>
 
+      {/* Main Content */}
+      <div class="space-y-8">
+        {/* What I'm Doing */}
+        <section>
+          <h2 class="mb-4 text-xl font-bold">我在做的事</h2>
+          <div class="grid gap-4 sm:grid-cols-2">
+            {doingCards.map(card => <AboutCard {...card} />)}
+          </div>
+        </section>
+
+        {/* About Content */}
+        <section class="prose prose-neutral dark:prose-invert max-w-none">
+          <Content />
+        </section>
+      </div>
+    </div>
+  </main>
   <Footer />
 </Layout>

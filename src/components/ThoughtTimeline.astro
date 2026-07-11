@@ -1,0 +1,117 @@
+---
+interface Thought {
+  id: string;
+  data: {
+    pubDatetime: Date;
+    tags?: string[];
+    mood?: string;
+    location?: string;
+  };
+  Content: any;
+}
+
+interface Props {
+  thoughts: Thought[];
+}
+
+const { thoughts } = Astro.props;
+
+// Group thoughts by date
+const groupedThoughts = thoughts.reduce(
+  (acc, thought) => {
+    const date = new Date(thought.data.pubDatetime).toDateString();
+    if (!acc[date]) {
+      acc[date] = [];
+    }
+    acc[date].push(thought);
+    return acc;
+  },
+  {} as Record<string, Thought[]>
+);
+
+const sortedDates = Object.keys(groupedThoughts).sort(
+  (a, b) => new Date(b).getTime() - new Date(a).getTime()
+);
+---
+
+<div class="space-y-8">
+  {
+    sortedDates.map(date => (
+      <div class="relative">
+        {/* Date Header */}
+        <div class="mb-4 flex items-center gap-3">
+          <div class="bg-accent text-accent-foreground flex h-10 w-10 items-center justify-center rounded-full text-sm font-medium">
+            {new Date(date).getDate()}
+          </div>
+          <div>
+            <div class="font-medium">
+              {new Date(date).toLocaleDateString("zh-CN", {
+                month: "long",
+                year: "numeric",
+              })}
+            </div>
+            <div class="text-muted-foreground text-xs">
+              {new Date(date).toLocaleDateString("zh-CN", { weekday: "long" })}
+            </div>
+          </div>
+        </div>
+
+        {/* Thoughts for this date */}
+        <div class="border-border ml-5 space-y-4 border-l-2 pl-8">
+          {groupedThoughts[date].map(thought => (
+            <div
+              id={`thought-${new Date(thought.data.pubDatetime).toISOString().split("T")[0]}`}
+              class="bg-card relative rounded-xl border p-4 transition-all hover:shadow-md"
+            >
+              {/* Timeline dot */}
+              <div class="border-background bg-accent absolute top-6 -left-[calc(2rem+1px)] h-3 w-3 rounded-full border-2" />
+
+              {/* Content */}
+              <div class="text-foreground prose prose-sm max-w-none">
+                <thought.Content />
+              </div>
+
+              {/* Meta */}
+              <div class="text-muted-foreground mt-3 flex flex-wrap items-center gap-3 text-xs">
+                <span>
+                  {new Date(thought.data.pubDatetime).toLocaleTimeString(
+                    "zh-CN",
+                    { hour: "2-digit", minute: "2-digit" }
+                  )}
+                </span>
+
+                {thought.data.mood && (
+                  <span class="bg-secondary rounded-full px-2 py-0.5">
+                    {thought.data.mood}
+                  </span>
+                )}
+
+                {thought.data.location && (
+                  <span class="flex items-center gap-1">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" />
+                      <circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {thought.data.location}
+                  </span>
+                )}
+
+                {thought.data.tags?.map(tag => (
+                  <span class="rounded-full border px-2 py-0.5">#{tag}</span>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    ))
+  }
+</div>

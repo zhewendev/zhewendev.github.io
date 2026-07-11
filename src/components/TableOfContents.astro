@@ -1,0 +1,84 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+}
+
+const { headings } = Astro.props;
+
+// Filter h2 and h3 headings only
+const tocHeadings = headings.filter(h => h.depth >= 2 && h.depth <= 3);
+---
+
+{
+  tocHeadings.length > 0 && (
+    <nav class="sticky top-24 max-h-[calc(100vh-8rem)] overflow-y-auto">
+      <h3 class="text-muted-foreground mb-3 text-sm font-semibold tracking-wider uppercase">
+        目录
+      </h3>
+      <ul class="border-border space-y-1 border-l">
+        {tocHeadings.map(heading => (
+          <li class:list={["toc-item", heading.depth === 3 && "ml-4"]}>
+            <a
+              href={`#${heading.slug}`}
+              class="text-muted-foreground hover:border-accent hover:text-foreground block border-l-2 border-transparent py-1 pl-4 text-sm transition-colors"
+              data-heading-slug={heading.slug}
+            >
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+  )
+}
+
+<script>
+  // Highlight current heading on scroll
+  function initToc() {
+    const tocLinks = document.querySelectorAll(".toc-item a");
+    const headings = document.querySelectorAll("h2[id], h3[id]");
+
+    if (tocLinks.length === 0 || headings.length === 0) return;
+
+    const observer = new IntersectionObserver(
+      entries => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const slug = entry.target.id;
+            tocLinks.forEach(link => {
+              const linkSlug = link.getAttribute("data-heading-slug");
+              if (linkSlug === slug) {
+                link.classList.add("border-accent", "text-foreground");
+                link.classList.remove(
+                  "border-transparent",
+                  "text-muted-foreground"
+                );
+              } else {
+                link.classList.remove("border-accent", "text-foreground");
+                link.classList.add(
+                  "border-transparent",
+                  "text-muted-foreground"
+                );
+              }
+            });
+          }
+        });
+      },
+      {
+        rootMargin: "-20% 0px -80% 0px",
+        threshold: 0,
+      }
+    );
+
+    headings.forEach(heading => observer.observe(heading));
+  }
+
+  initToc();
+  document.addEventListener("astro:after-swap", initToc);
+</script>

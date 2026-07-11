@@ -1,0 +1,136 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import ArticleCard from "@/components/ArticleCard.astro";
+import Pagination from "@/components/Pagination.astro";
+import CategoryTabs from "@/components/CategoryTabs.astro";
+import { getSortedPosts } from "@/utils/getSortedPosts";
+import { useTranslations } from "@/i18n";
+import config from "@/config";
+
+const { posts: postsConfig } = config;
+
+const locale = Astro.currentLocale ?? config.site.lang;
+const t = useTranslations(locale);
+
+// Get all posts
+const posts = await getCollection("posts");
+const sortedPosts = getSortedPosts(posts);
+
+// Get unique categories from tags
+const allTags = sortedPosts.flatMap(post => post.data.tags || []);
+const uniqueTags = [...new Set(allTags)];
+const categories = uniqueTags.map(tag => ({
+  name: tag,
+  slug: tag.toLowerCase().replace(/\s+/g, "-"),
+}));
+
+// Get current category from URL
+const url = new URL(Astro.request.url);
+const currentCategory = url.searchParams.get("category") || "all";
+
+// Filter posts by category
+const filteredPosts =
+  currentCategory === "all"
+    ? sortedPosts
+    : sortedPosts.filter(post =>
+        post.data.tags?.some(
+          tag => tag.toLowerCase().replace(/\s+/g, "-") === currentCategory
+        )
+      );
+
+// Pagination
+const page = parseInt(url.searchParams.get("page") || "1");
+const perPage = postsConfig.perPage;
+const totalPages = Math.ceil(filteredPosts.length / perPage);
+const paginatedPosts = filteredPosts.slice(
+  (page - 1) * perPage,
+  page * perPage
+);
+
+// Create page object for Pagination component
+const baseUrl = `/articles?category=${currentCategory}`;
+const pageObj = {
+  data: paginatedPosts,
+  currentPage: page,
+  lastPage: Math.max(totalPages, 1),
+  url: {
+    current: `${baseUrl}&page=${page}`,
+    prev: page > 1 ? `${baseUrl}&page=${page - 1}` : undefined,
+    next: page < totalPages ? `${baseUrl}&page=${page + 1}` : undefined,
+    first: totalPages > 1 ? `${baseUrl}&page=1` : undefined,
+    last: totalPages > 1 ? `${baseUrl}&page=${totalPages}` : undefined,
+  },
+  // Required Page interface properties
+  start: 0,
+  end: paginatedPosts.length,
+  total: filteredPosts.length,
+  size: perPage,
+};
+---
+
+<Layout title={`${t.nav.articles} | ${config.site.title}`}>
+  <Header />
+  <main id="main-content" class="app-layout py-8">
+    {/* Page Header */}
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">{t.nav.articles}</h1>
+      <p class="text-muted-foreground mt-2">
+        共 {filteredPosts.length} 篇文章，分享技术见解与学习心得
+      </p>
+    </div>
+
+    {/* Search Bar */}
+    <div class="mb-6">
+      <a
+        href={getRelativeLocaleUrl(locale, "search")}
+        class="bg-background text-muted-foreground hover:bg-accent hover:text-accent-foreground flex items-center gap-3 rounded-lg border px-4 py-3 transition-colors"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <span>搜索文章...</span>
+      </a>
+    </div>
+
+    {/* Category Tabs */}
+    <CategoryTabs
+      categories={categories}
+      activeCategory={currentCategory}
+      baseUrl={getRelativeLocaleUrl(locale, "articles")}
+    />
+
+    {/* Posts List */}
+    <div class="divide-border divide-y">
+      {
+        paginatedPosts.length > 0 ? (
+          paginatedPosts.map(post => (
+            <ArticleCard post={post} variant="default" />
+          ))
+        ) : (
+          <div class="text-muted-foreground py-12 text-center">
+            <p>暂无文章</p>
+          </div>
+        )
+      }
+    </div>
+
+    {/* Pagination */}
+    <Pagination page={pageObj} showNumbers={true} />
+  </main>
+  <Footer />
+</Layout>

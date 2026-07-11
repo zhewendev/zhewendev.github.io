@@ -2,6 +2,12 @@ export interface UIStrings {
   nav: {
     home: string;
     posts: string;
+    articles: string;
+    series: string;
+    collections: string;
+    books: string;
+    tools: string;
+    thoughts: string;
     tags: string;
     about: string;
     archives: string;
@@ -34,6 +40,13 @@ export interface UIStrings {
   footer: {
     copyright: string;
     allRightsReserved: string;
+    navigation: string;
+    resources: string;
+    contact: string;
+    subscribe: string;
+    subscribePlaceholder: string;
+    subscribeButton: string;
+    icp: string;
   };
   pages: {
     tagTitle: string;

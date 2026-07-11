@@ -1,0 +1,156 @@
+---
+import { getCollection } from "astro:content";
+import { getRelativeLocaleUrl } from "astro:i18n";
+import Layout from "@/layouts/Layout.astro";
+import Header from "@/components/Header.astro";
+import Footer from "@/components/Footer.astro";
+import ToolCard from "@/components/ToolCard.astro";
+import ToolModal from "@/components/ToolModal.astro";
+import config from "@/config";
+
+const locale = Astro.currentLocale ?? config.site.lang;
+
+// Get all tools
+const allTools = await getCollection("tools");
+const tools = allTools.sort((a, b) => {
+  const order = { essential: 0, recommended: 1, optional: 2 };
+  return order[a.data.recommendation] - order[b.data.recommendation];
+});
+
+// Stats
+const totalTools = tools.length;
+const essentialCount = tools.filter(
+  t => t.data.recommendation === "essential"
+).length;
+const recommendedCount = tools.filter(
+  t => t.data.recommendation === "recommended"
+).length;
+const optionalCount = tools.filter(
+  t => t.data.recommendation === "optional"
+).length;
+
+// Filter by recommendation
+const url = new URL(Astro.request.url);
+const currentFilter = url.searchParams.get("recommendation") || "all";
+
+const filteredTools =
+  currentFilter === "all"
+    ? tools
+    : tools.filter(t => t.data.recommendation === currentFilter);
+
+// Get unique categories
+const allCategories = tools.map(t => t.data.category);
+const uniqueCategories = [...new Set(allCategories)];
+---
+
+<Layout title={`工具收藏 | ${config.site.title}`}>
+  <Header />
+  <main id="main-content" class="app-layout py-8">
+    {/* Page Header */}
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold">工具收藏</h1>
+      <p class="text-muted-foreground mt-2">分享提升效率的工具和软件</p>
+    </div>
+
+    {/* Stats */}
+    <div class="mb-8 grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold">{totalTools}</div>
+        <div class="text-muted-foreground text-sm">全部</div>
+      </div>
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold text-red-500">{essentialCount}</div>
+        <div class="text-muted-foreground text-sm">必备</div>
+      </div>
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold text-orange-500">{recommendedCount}</div>
+        <div class="text-muted-foreground text-sm">推荐</div>
+      </div>
+      <div class="rounded-xl border p-4 text-center">
+        <div class="text-2xl font-bold text-blue-400">{optionalCount}</div>
+        <div class="text-muted-foreground text-sm">了解</div>
+      </div>
+    </div>
+
+    {/* Filters */}
+    <div class="mb-6 flex flex-wrap gap-2">
+      <a
+        href={getRelativeLocaleUrl(locale, "tools")}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "all"
+            ? "bg-primary text-primary-foreground"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        全部
+      </a>
+      <a
+        href={`${getRelativeLocaleUrl(locale, "tools")}?recommendation=essential`}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "essential"
+            ? "bg-red-500 text-white"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        必备
+      </a>
+      <a
+        href={`${getRelativeLocaleUrl(locale, "tools")}?recommendation=recommended`}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "recommended"
+            ? "bg-orange-500 text-white"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        推荐
+      </a>
+      <a
+        href={`${getRelativeLocaleUrl(locale, "tools")}?recommendation=optional`}
+        class:list={[
+          "rounded-full px-4 py-2 text-sm font-medium transition-colors",
+          currentFilter === "optional"
+            ? "bg-blue-400 text-white"
+            : "hover:bg-accent hover:text-accent-foreground border",
+        ]}
+      >
+        了解
+      </a>
+    </div>
+
+    {/* Categories */}
+    {
+      uniqueCategories.length > 0 && (
+        <div class="mb-6 flex flex-wrap gap-2">
+          {uniqueCategories.map(category => (
+            <span class="bg-secondary text-secondary-foreground rounded-full px-3 py-1 text-xs">
+              {category}
+            </span>
+          ))}
+        </div>
+      )
+    }
+
+    {/* Tools Grid */}
+    {
+      filteredTools.length > 0 ? (
+        <div class="grid gap-4 sm:grid-cols-2">
+          {filteredTools.map(tool => (
+            <ToolCard tool={tool} />
+          ))}
+        </div>
+      ) : (
+        <div class="text-muted-foreground py-12 text-center">
+          <p>暂无工具</p>
+        </div>
+      )
+    }
+  </main>
+
+  {/* Modals */}
+  {tools.map(tool => <ToolModal tool={tool} />)}
+
+  <Footer />
+</Layout>

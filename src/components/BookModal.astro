@@ -1,0 +1,130 @@
+---
+import Modal from "./Modal.astro";
+import type { CollectionEntry } from "astro:content";
+
+interface Props {
+  book: CollectionEntry<"books">;
+}
+
+const { book } = Astro.props;
+
+const { title, author, cover, rating, review, tags, status, readDate, link } =
+  book.data;
+const rawCover = typeof cover === "string" ? cover : cover?.src;
+
+const statusLabels = {
+  reading: "在读",
+  completed: "已读",
+  "want-to-read": "想读",
+};
+---
+
+<Modal id={`book-modal-${book.id}`} title={title}>
+  <div class="flex flex-col gap-6 sm:flex-row">
+    {/* Cover */}
+    <div
+      class="bg-muted mx-auto aspect-[2/3] w-40 flex-shrink-0 overflow-hidden rounded-lg sm:w-48"
+    >
+      <img
+        src={rawCover || "/images/placeholder/book.svg"}
+        alt={title}
+        class="h-full w-full object-cover"
+      />
+    </div>
+
+    {/* Details */}
+    <div class="flex-1">
+      <p class="text-muted-foreground text-lg">{author}</p>
+
+      {/* Status & Date */}
+      <div class="mt-3 flex flex-wrap items-center gap-2">
+        <span
+          class:list={[
+            "rounded-full px-3 py-1 text-sm font-medium text-white",
+            status === "reading" && "bg-blue-500",
+            status === "completed" && "bg-green-500",
+            status === "want-to-read" && "bg-gray-400",
+          ]}
+        >
+          {statusLabels[status]}
+        </span>
+        {
+          readDate && (
+            <span class="text-muted-foreground text-sm">
+              读完于 {new Date(readDate).toLocaleDateString("zh-CN")}
+            </span>
+          )
+        }
+      </div>
+
+      {/* Rating */}
+      {
+        rating && (
+          <div class="mt-4 flex items-center gap-2">
+            <div class="flex text-yellow-500">
+              {Array.from({ length: 5 }).map((_, i) => (
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill={i < Math.floor(rating) ? "currentColor" : "none"}
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                </svg>
+              ))}
+            </div>
+            <span class="text-lg font-medium">{rating}</span>
+            <span class="text-muted-foreground">/ 5</span>
+          </div>
+        )
+      }
+
+      {/* Review */}
+      {
+        review && (
+          <div class="mt-4">
+            <h4 class="font-medium">读后感</h4>
+            <p class="text-muted-foreground mt-2 leading-relaxed">{review}</p>
+          </div>
+        )
+      }
+
+      {/* Tags */}
+      {
+        tags && tags.length > 0 && (
+          <div class="mt-4 flex flex-wrap gap-2">
+            {tags.map(tag => (
+              <span class="rounded-full border px-3 py-1 text-sm">{tag}</span>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+
+  {/* Footer */}
+  <div slot="footer" class="flex justify-end gap-3">
+    <button
+      type="button"
+      class="hover:bg-accent hover:text-accent-foreground rounded-lg border px-4 py-2 text-sm font-medium transition-colors"
+      onclick={`window.closeModal('book-modal-${book.id}')`}
+    >
+      关闭
+    </button>
+    {
+      link && (
+        <a
+          href={link}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="bg-primary text-primary-foreground hover:bg-primary/90 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
+        >
+          查看链接
+        </a>
+      )
+    }
+  </div>
+</Modal>

@@ -1,6 +1,5 @@
 ---
 import { getRelativeLocaleUrl } from "astro:i18n";
-import IconUnderline from "@/assets/icons/IconUnderline.svg";
 import IconMenuDeep from "@/assets/icons/IconMenuDeep.svg";
 import IconArchive from "@/assets/icons/IconArchive.svg";
 import IconSunHigh from "@/assets/icons/IconSunHigh.svg";
@@ -18,7 +17,6 @@ const locale = Astro.currentLocale ?? config.site.lang;
 const t = useTranslations(locale);
 
 // Strip the base prefix so isActive comparisons work regardless of deploy subdirectory.
-// e.g. with base "/blog": "/blog/posts/slug" → "/posts/slug"
 const relativePath = stripBase(Astro.url.pathname);
 const pathWithoutTrailingSlash =
   relativePath.endsWith("/") && relativePath !== "/"
@@ -32,6 +30,27 @@ const isActive = (path: string) => {
   const pathArray = path.split("/").filter(p => p.trim());
   return currentPath === path || currentPathArray[0] === pathArray[0];
 };
+
+// Navigation items with dropdown support
+const navItems = [
+  {
+    name: t.nav.articles,
+    href: "/articles",
+    active: isActive("/articles") || isActive("/posts"),
+  },
+  { name: t.nav.series, href: "/series", active: isActive("/series") },
+  {
+    name: t.nav.collections,
+    href: "#",
+    active: isActive("/books") || isActive("/tools"),
+    dropdown: [
+      { name: t.nav.books, href: "/books" },
+      { name: t.nav.tools, href: "/tools" },
+    ],
+  },
+  { name: t.nav.thoughts, href: "/thoughts", active: isActive("/thoughts") },
+  { name: t.nav.about, href: "/about", active: isActive("/about") },
+];
 ---
 
 <a
@@ -48,16 +67,20 @@ const isActive = (path: string) => {
   <div
     class="border-border bg-background relative flex w-full items-baseline justify-between border-b py-4 sm:items-center sm:py-6"
   >
+    <!-- Logo -->
     <a
       href={getRelativeLocaleUrl(locale, "")}
       class="absolute py-1 text-xl leading-8 font-semibold whitespace-nowrap sm:static sm:my-auto sm:text-2xl sm:leading-none"
     >
       {site.title}
     </a>
+
+    <!-- Navigation -->
     <nav
       id="nav-menu"
-      class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:space-x-4 sm:py-0"
+      class="flex w-full flex-col items-center sm:ms-2 sm:flex-row sm:justify-end sm:space-x-1 sm:py-0"
     >
+      <!-- Mobile Menu Button -->
       <button
         id="menu-btn"
         class="focus-outline self-end p-2 sm:hidden"
@@ -70,91 +93,120 @@ const isActive = (path: string) => {
         <IconX id="close-icon" class="hidden" />
         <IconMenuDeep id="menu-icon" />
       </button>
+
+      <!-- Menu Items -->
       <ul
         id="menu-items"
-        class="[&>li>a]:hover:text-accent mt-4 hidden w-44 grid-cols-2 place-content-center gap-2 sm:mt-0 sm:flex sm:w-auto sm:gap-x-5 sm:gap-y-0 sm:[&>li]:h-8 [&>li>a]:block [&>li>a]:px-4 [&>li>a]:py-3 [&>li>a]:text-center [&>li>a]:font-medium sm:[&>li>a]:px-2 sm:[&>li>a]:py-1"
+        class="hidden w-full flex-col items-center gap-1 py-4 sm:flex sm:w-auto sm:flex-row sm:gap-0 sm:py-0"
       >
-        <li class="col-span-2">
-          <a
-            href={getRelativeLocaleUrl(locale, "posts")}
-            class:list={{ "active-nav": isActive("/posts") }}
-          >
-            {t.nav.posts}
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a
-            href={getRelativeLocaleUrl(locale, "tags")}
-            class:list={{ "active-nav": isActive("/tags") }}
-          >
-            {t.nav.tags}
-          </a>
-        </li>
-        <li class="col-span-2">
-          <a
-            href={getRelativeLocaleUrl(locale, "about")}
-            class:list={{ "active-nav": isActive("/about") }}
-          >
-            {t.nav.about}
-          </a>
-        </li>
+        {
+          navItems.map(item => (
+            <li class="group relative">
+              {item.dropdown ? (
+                // Dropdown menu item
+                <>
+                  <button
+                    class="hover:text-accent flex items-center gap-1 px-3 py-2 font-medium transition-colors"
+                    aria-expanded="false"
+                    aria-haspopup="true"
+                  >
+                    {item.name}
+                    <svg
+                      class="h-4 w-4 transition-transform group-hover:rotate-180"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                        d="M19 9l-7 7-7-7"
+                      />
+                    </svg>
+                  </button>
+                  {/* Dropdown */}
+                  <ul class="invisible absolute top-full left-0 z-50 min-w-[140px] rounded-md border bg-white py-1 opacity-0 shadow-lg transition-all group-hover:visible group-hover:opacity-100 dark:border-gray-700 dark:bg-gray-800">
+                    {item.dropdown.map(subItem => (
+                      <li>
+                        <a
+                          href={getRelativeLocaleUrl(locale, subItem.href)}
+                          class="hover:bg-accent hover:text-accent-foreground block px-4 py-2 text-sm transition-colors"
+                        >
+                          {subItem.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                // Regular nav item
+                <a
+                  href={getRelativeLocaleUrl(locale, item.href)}
+                  class:list={[
+                    "hover:text-accent block px-3 py-2 font-medium transition-colors",
+                    { "text-accent": item.active },
+                  ]}
+                >
+                  {item.name}
+                </a>
+              )}
+            </li>
+          ))
+        }
+
+        {/* Archives */}
         {
           features.showArchives && (
-            <li class="col-span-2">
+            <li>
               <LinkButton
                 href={getRelativeLocaleUrl(locale, "archives")}
                 class:list={[
-                  "focus-outline flex size-full justify-center p-3 sm:relative sm:size-8 sm:p-0",
-                  { "active-nav": isActive("/archives") },
+                  "focus-outline flex items-center justify-center p-2 sm:relative sm:size-8 sm:p-0",
+                  { "text-accent": isActive("/archives") },
                 ]}
                 title={t.nav.archives}
                 aria-label={t.nav.archives}
               >
-                <IconArchive class="hidden sm:absolute sm:top-1/2 sm:left-1/2 sm:block sm:size-6 sm:-translate-x-1/2 sm:-translate-y-1/2" />
-                <span class="sm:sr-only">{t.nav.archives}</span>
-                {isActive("/archives") && (
-                  <IconUnderline
-                    aria-hidden="true"
-                    class="scale-125 max-sm:hidden sm:absolute sm:bottom-0 sm:w-6"
-                  />
-                )}
+                <IconArchive class="size-5 sm:absolute sm:top-1/2 sm:left-1/2 sm:size-5 sm:-translate-x-1/2 sm:-translate-y-1/2" />
+                <span class="sr-only">{t.nav.archives}</span>
               </LinkButton>
             </li>
           )
         }
+
+        {/* Search */}
         {
           features.search !== false && (
-            <li class="col-span-1 flex items-center justify-center">
+            <li>
               <LinkButton
                 href={getRelativeLocaleUrl(locale, "search")}
-                class:list={["focus-outline relative size-8"]}
+                class:list={[
+                  "focus-outline relative flex size-8 items-center justify-center",
+                ]}
                 title={t.nav.search}
                 aria-label={t.nav.search}
               >
-                <IconSearch class="absolute top-1/2 left-1/2 size-6 -translate-x-1/2 -translate-y-1/2" />
+                <IconSearch class="size-5" />
                 <span class="sr-only">{t.nav.search}</span>
-                {isActive("/search") && (
-                  <IconUnderline
-                    aria-hidden="true"
-                    class="absolute bottom-0 w-6 scale-125 max-sm:inset-s-2"
-                  />
-                )}
               </LinkButton>
             </li>
           )
         }
+
+        {/* Theme Toggle */}
         {
           features.lightAndDarkMode && (
-            <li class="col-span-1 flex items-center justify-center">
+            <li>
               <button
                 id="theme-btn"
-                class="focus-outline hover:[&>svg]:stroke-accent relative size-12 p-4 sm:size-8"
+                class="focus-outline hover:text-accent relative flex size-8 items-center justify-center"
                 title={t.a11y.toggleTheme}
                 aria-label="auto"
                 aria-live="polite"
               >
-                <IconMoon class="absolute top-[50%] left-[50%] translate-[-50%] scale-100 rotate-0 transition-all dark:scale-0 dark:-rotate-90" />
-                <IconSunHigh class="absolute top-[50%] left-[50%] translate-[-50%] scale-0 rotate-90 transition-all dark:scale-100 dark:rotate-0" />
+                <IconMoon class="absolute transition-all dark:scale-0 dark:opacity-0" />
+                <IconSunHigh class="absolute scale-0 opacity-0 transition-all dark:scale-100 dark:opacity-100" />
               </button>
             </li>
           )
@@ -183,13 +235,12 @@ const isActive = (path: string) => {
       menuBtn.setAttribute("aria-label", openMenu ? openLabel : closeLabel);
 
       menuItems.classList.toggle("hidden");
-      menuItems.classList.toggle("grid");
+      menuItems.classList.toggle("flex");
       menuIcon.classList.toggle("hidden");
       closeIcon.classList.toggle("hidden");
     });
   }
 
   toggleNav();
-
   document.addEventListener("astro:after-swap", toggleNav);
 </script>

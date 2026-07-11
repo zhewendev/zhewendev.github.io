@@ -1,0 +1,56 @@
+---
+import { getRelativeLocaleUrl } from "astro:i18n";
+
+const locale = Astro.currentLocale ?? "en";
+---
+
+<section class="hero-section relative overflow-hidden">
+  {/* Background Image */}
+  <div class="absolute inset-0">
+    <img
+      src="/images/hero/bg-1.jpg"
+      alt=""
+      class="h-full w-full object-cover"
+      onerror="this.style.display='none'"
+    />
+    <div
+      class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/50 to-black/30"
+    >
+    </div>
+  </div>
+
+  {/* Content */}
+  <div
+    class="relative mx-auto w-full max-w-[1400px] px-4 py-24 sm:px-6 sm:py-32 lg:px-8 lg:py-40 xl:px-12"
+  >
+    <div class="max-w-2xl">
+      {/* Title */}
+      <h1
+        class="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl"
+      >
+        记录思考，沉淀知识
+      </h1>
+
+      {/* Subtitle */}
+      <p class="mt-4 text-lg leading-relaxed text-gray-200 sm:text-xl">
+        分享技术、阅读与生活的点滴，构建属于自己的知识宝库。
+      </p>
+
+      {/* CTA Buttons */}
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a
+          href={getRelativeLocaleUrl(locale, "/articles")}
+          class="inline-flex items-center justify-center rounded-lg bg-white px-6 py-3 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-100"
+        >
+          阅读文章
+        </a>
+        <a
+          href={getRelativeLocaleUrl(locale, "/about")}
+          class="inline-flex items-center justify-center rounded-lg border-2 border-white/30 bg-white/10 px-6 py-3 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20"
+        >
+          关于我
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
