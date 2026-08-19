@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bgLight" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#4f8ee8" />
+      <stop offset="100%" stop-color="#1a73e8" />
+    </linearGradient>
+    <linearGradient id="bgDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff8a3d" />
+      <stop offset="100%" stop-color="#ff6b01" />
+    </linearGradient>
+  </defs>
+
+  <rect
+    x="0"
+    y="0"
+    width="128"
+    height="128"
+    rx="26"
+    ry="26"
+    fill="url(#bgLight)"
+  />
+
+  {/* 中心 "者" 字 — 名字首字，品牌识别点 */}
+  <text
+    x="64"
+    y="92"
+    text-anchor="middle"
+    font-family="'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Source Han Sans SC', system-ui, sans-serif"
+    font-weight="900"
+    font-size="86"
+    fill="#ffffff"
+    letter-spacing="0"
+  >者</text>
+
+  {/* 右上角小星 — 呼应 "奔赴星辰" */}
+  <path
+    d="M 100 24 L 103 32 L 111 33 L 105 39 L 107 47 L 100 43 L 93 47 L 95 39 L 89 33 L 97 32 Z"
+    fill="#ffffff"
+    fill-opacity="0.78"
+  />
+
+  <style>
+    rect { fill: url(#bgLight); }
+    @media (prefers-color-scheme: dark) {
+      rect { fill: url(#bgDark); }
+    }
+  </style>
+</svg>
